@@ -8,6 +8,8 @@ pydirectinput.PAUSE = 0
 
 keysDown = {}   #list of currently pressed keys
 
+recentlyToggled = False
+
 
 def keyDown(key):               #what to do if key pressed. takes value from handleJoyStickAsArrowKeys
     keysDown[key] = True        #adds key to KeysDown list
@@ -21,17 +23,29 @@ def keyUp(key):                     #what to do if key released. takes value fro
         pydirectinput.keyUp(key)    #runs pydirectinput using key from (argument)
         #print('Up: ', key)         #remove '#' from print to test data stream
 
+def keyToggle(key):
+    global recentlyToggled
+    if key in keysDown:
+        del (keysDown[key])
+        pydirectinput.keyUp(key)
+    else:
+        keysDown[key] = True
+        pydirectinput.keyDown(key)
+    recentlyToggled = True
+
 
 def handleJoyStickAsArrowKeys(x, y, z):      #note that the x and y directions are swapped due to the way I orient my thumbstick
+    global recentlyToggled
     if x == 0:          #0 is up on joystick
         keyDown('c')   #add up key to keyDown (argument)
-        keyUp('v')   #add down key to keyUp (argument), as you can't press up and down together
+        recentlyToggled = False
     elif x == 2:        #2 is down on joystick
-        keyDown('v')
+        if recentlyToggled == False:
+            keyToggle('v')
         keyUp('c')
     else:               #1 is neutral on joystick
         keyUp('c')
-        keyUp('v')
+        recentlyToggled = False
 
     if y == 2:          #2 is right on joystick
         keyDown('pageup')
