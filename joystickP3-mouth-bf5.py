@@ -7,6 +7,7 @@ pydirectinput.FAILSAFE = False
 pydirectinput.PAUSE = 0
 
 zoom = False
+zoomToggled = False
 
 keysDown = {}   #list of currently pressed keys
 
@@ -23,26 +24,31 @@ def keyUp(key):                     #what to do if key released. takes value fro
         pydirectinput.keyUp(key)    #runs pydirectinput using key from (argument)
         #print('Up: ', key)         #remove '#' from print to test data stream
 
-def toggleZoom(zoom):
+def toggleZoom():
+    global zoom
+    global zoomToggled
     zoom = not zoom
-    return zoom
+    zoomToggled = True
 
 
-def handleJoyStickAsArrowKeys(x, y, z, zoom):      #note that the x and y directions are swapped due to the way I orient my thumbstick
+def handleJoyStickAsArrowKeys(x, y, z):      #note that the x and y directions are swapped due to the way I orient my thumbstick
+    global zoom
+    global zoomToggled
     if x == 0:
         keyDown('c')
-    elif x == 2:
+    elif x == 2 and zoomToggled == False:
         if zoom == False:
             keyDown('v')
-            toggleZoom(zoom)
+            toggleZoom()
             print(zoom)
         else:
             keyUp('v')
-            toggleZoom(zoom)
+            toggleZoom()
             print(zoom)
         keyUp('c')
     else:
         keyUp('c')
+        zoomToggled = False
 
     if y == 2:          #2 is right on joystick
         keyDown('pageup')
@@ -58,7 +64,6 @@ def handleJoyStickAsArrowKeys(x, y, z, zoom):      #note that the x and y direct
         keyDown('')    #key to be pressed with Joystick button. Change to any key
     else:
         keyUp('')      #0 is button not pressed
-    return zoom
 
 
 while True:
@@ -69,4 +74,4 @@ while True:
         dy = int(data[3])                   #Y direction is fourth digit in data
         JSButton = int(data[5])             #JSButton is sixth digit in 
         #print(dx, dy, JSButton)            #remove '#' from print to test data stream
-        zoom = handleJoyStickAsArrowKeys(dx, dy, JSButton, zoom)     #run body of code using dx, dy and JSButton as inputs
+        handleJoyStickAsArrowKeys(dx, dy, JSButton)     #run body of code using dx, dy and JSButton as inputs
