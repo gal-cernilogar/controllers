@@ -6,9 +6,6 @@ arduino = serial.Serial('COM11', 115200, timeout=.1)     #serial input from ardu
 pydirectinput.FAILSAFE = False
 pydirectinput.PAUSE = 0
 
-zoom = False
-zoomToggled = False
-
 keysDown = {}   #list of currently pressed keys
 
 
@@ -24,31 +21,17 @@ def keyUp(key):                     #what to do if key released. takes value fro
         pydirectinput.keyUp(key)    #runs pydirectinput using key from (argument)
         #print('Up: ', key)         #remove '#' from print to test data stream
 
-def toggleZoom():
-    global zoom
-    global zoomToggled
-    zoom = not zoom
-    zoomToggled = True
-
 
 def handleJoyStickAsArrowKeys(x, y, z):      #note that the x and y directions are swapped due to the way I orient my thumbstick
-    global zoom
-    global zoomToggled
-    if x == 0:
-        keyDown('c')
-    elif x == 2 and zoomToggled == False:
-        if zoom == False:
-            keyDown('v')
-            toggleZoom()
-            print(zoom)
-        else:
-            keyUp('v')
-            toggleZoom()
-            print(zoom)
+    if x == 0:          #0 is up on joystick
+        keyDown('c')   #add up key to keyDown (argument)
+        keyUp('v')   #add down key to keyUp (argument), as you can't press up and down together
+    elif x == 2:        #2 is down on joystick
+        keyDown('v')
         keyUp('c')
-    else:
+    else:               #1 is neutral on joystick
         keyUp('c')
-        zoomToggled = False
+        keyUp('v')
 
     if y == 2:          #2 is right on joystick
         keyDown('pageup')
@@ -72,6 +55,6 @@ while True:
     if data.startswith("S"):                #make sure the read starts in the correct place
         dx = int(data[1])                   #X direction is second digit in data (data[0] is 'S')
         dy = int(data[3])                   #Y direction is fourth digit in data
-        JSButton = int(data[5])             #JSButton is sixth digit in 
+        JSButton = int(data[5])             #JSButton is sixth digit in data
         #print(dx, dy, JSButton)            #remove '#' from print to test data stream
         handleJoyStickAsArrowKeys(dx, dy, JSButton)     #run body of code using dx, dy and JSButton as inputs
